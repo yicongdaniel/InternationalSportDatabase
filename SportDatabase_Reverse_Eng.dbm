@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+         Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.1" last-position="0,348" last-zoom="1"
+	 default-schema="public" default-owner="postgres">
+<database name="assignment2" encoding="UTF8" lc-collate="English_United States.1252" lc-ctype="English_United States.1252" is-template="false" allow-conns="true">
+	<role name="postgres"/>
+	<tablespace name="pg_default"/>
+</database>
+
+<schema name="public" rect-visible="true" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<function name="log_last_name_change"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="100"
+		row-amount="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="trigger" length="1"/>
+	</return-type>
+	<definition><![CDATA[
+BEGIN
+    -- check if last_name has changed
+    -- compare NEW. to OLD.
+    IF NEW.last_name <> OLD.last_name THEN
+    INSERT INTO Employee_Audit_T( Employee_ID, Old_Last_Name, Changed_ON )
+    VALUES( OLD.Employee_ID, OLD.Last_Name, NOW() );
+    END IF;
+
+    RETURN NEW;
+END;
+]]></definition>
+</function>
+
+<table name="stadium_t">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="916" y="709"/>
+	<column name="building_id" not-null="true">
+		<type name="character" length="1"/>
+	</column>
+	<column name="building_name">
+		<type name="character varying" length="20"/>
+	</column>
+	<column name="address">
+		<type name="character varying" length="30"/>
+	</column>
+	<column name="capacity">
+		<type name="bigint" length="0"/>
+	</column>
+	<column name="sport_id">
+		<type name="character" length="6"/>
+	</column>
+	<constraint name="stadium_pk" type="pk-constr" table="public.stadium_t">
+		<columns names="building_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="sport_t">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="920" y="123"/>
+	<column name="sport_id" not-null="true">
+		<type name="character" length="6"/>
+	</column>
+	<column name="sport_name">
+		<type name="character varying" length="20"/>
+	</column>
+	<column name="building_id">
+		<type name="character" length="1"/>
+	</column>
+	<constraint name="sport_pk" type="pk-constr" table="public.sport_t">
+		<columns names="sport_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="country_t">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="106" y="409"/>
+	<column name="country_code" not-null="true">
+		<type name="character" length="3"/>
+	</column>
+	<column name="country_name">
+		<type name="character varying" length="20"/>
+	</column>
+	<column name="national_anthem">
+		<type name="character varying" length="40"/>
+	</column>
+	<constraint name="country_pk" type="pk-constr" table="public.country_t">
+		<columns names="country_code" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="athlete_t">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="100" y="57"/>
+	<column name="athlete_id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="first_name">
+		<type name="character varying" length="20"/>
+	</column>
+	<column name="last_name">
+		<type name="character varying" length="20"/>
+	</column>
+	<column name="gender">
+		<type name="character" length="1"/>
+	</column>
+	<column name="nationality">
+		<type name="character" length="3"/>
+	</column>
+	<column name="sport_id">
+		<type name="character" length="6"/>
+	</column>
+	<column name="age">
+		<type name="smallint" length="0"/>
+	</column>
+	<constraint name="athlete_t_age_check" type="ck-constr" table="public.athlete_t">
+			<expression><![CDATA[(age >= 15)]]></expression>
+	</constraint>
+	<constraint name="athlete_pk" type="pk-constr" table="public.athlete_t">
+		<columns names="athlete_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="coach_t">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="112" y="675"/>
+	<column name="coach_id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="coach_name">
+		<type name="character varying" length="20"/>
+	</column>
+	<column name="nationality">
+		<type name="character" length="3"/>
+	</column>
+	<column name="sport_id">
+		<type name="character" length="6"/>
+	</column>
+	<constraint name="coach_pk" type="pk-constr" table="public.coach_t">
+		<columns names="coach_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<view name="avg_can">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="449" y="75"/>
+	<reference>
+		<expression><![CDATA[ SELECT athlete_t.athlete_id,
+    athlete_t.first_name,
+    athlete_t.last_name,
+    athlete_t.age
+   FROM athlete_t
+  WHERE (((athlete_t.age)::numeric < ( SELECT avg(athlete_t_1.age) AS avg
+           FROM athlete_t athlete_t_1)) AND (athlete_t.nationality = 'CAN'::bpchar));]]></expression>
+	</reference>
+</view>
+
+<view name="swim_v">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="689" y="75"/>
+	<reference>
+		<expression><![CDATA[ SELECT concat_ws(', '::text, athlete_t.last_name, athlete_t.first_name) AS athlete_name,
+    athlete_t.nationality,
+    athlete_t.age,
+    athlete_t.gender
+   FROM athlete_t
+  WHERE (athlete_t.sport_id = 'S10004'::bpchar);]]></expression>
+	</reference>
+</view>
+
+<index name="athlete_name_idx" table="public.athlete_t"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="90">
+		<idxelement use-sorting="false">
+			<column name="first_name"/>
+		</idxelement>
+		<idxelement use-sorting="false">
+			<column name="last_name"/>
+		</idxelement>
+</index>
+
+<index name="coach_name_idx" table="public.coach_t"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="90">
+		<idxelement use-sorting="false">
+			<column name="coach_name"/>
+		</idxelement>
+</index>
+
+<textbox name="Title" font-size="9">
+	<position x="544" y="259"/>
+	<comment><![CDATA[--Filename: Assignment2_Reverse_Eng
+--Name: Yicong Zhang, Jing Wang
+--Student#:040991538, 040977044
+--Date:2020/07/26
+--Summer 2020
+--Assignment2
+--Section 314]]></comment>
+</textbox>
+
+<constraint name="sport_fk" type="fk-constr" comparison-type="MATCH SIMPLE"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.stadium_t" table="public.sport_t">
+	<columns names="building_id" ref-type="src-columns"/>
+	<columns names="building_id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="athlete_fk1" type="fk-constr" comparison-type="MATCH SIMPLE"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.sport_t" table="public.athlete_t">
+	<columns names="sport_id" ref-type="src-columns"/>
+	<columns names="sport_id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="athlete_fk2" type="fk-constr" comparison-type="MATCH SIMPLE"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.country_t" table="public.athlete_t">
+	<columns names="nationality" ref-type="src-columns"/>
+	<columns names="country_code" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="coach_fk1" type="fk-constr" comparison-type="MATCH SIMPLE"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.sport_t" table="public.coach_t">
+	<columns names="sport_id" ref-type="src-columns"/>
+	<columns names="sport_id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="coach_fk2" type="fk-constr" comparison-type="MATCH SIMPLE"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.country_t" table="public.coach_t">
+	<columns names="nationality" ref-type="src-columns"/>
+	<columns names="country_code" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_sport_t_stadium_t" type="relfk"
+	 custom-color="#83af1f"
+	 src-table="public.sport_t"
+	 dst-table="public.stadium_t" reference-fk="sport_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_athlete_t_sport_t" type="relfk"
+	 custom-color="#5aa578"
+	 src-table="public.athlete_t"
+	 dst-table="public.sport_t" reference-fk="athlete_fk1"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="0" y="0"/>
+	</label>
+</relationship>
+
+<relationship name="rel_athlete_t_country_t" type="relfk"
+	 custom-color="#4b3e56"
+	 src-table="public.athlete_t"
+	 dst-table="public.country_t" reference-fk="athlete_fk2"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="3.43329" y="-21.1857"/>
+	</label>
+</relationship>
+
+<relationship name="rel_coach_t_sport_t" type="relfk"
+	 custom-color="#9ac721"
+	 src-table="public.coach_t"
+	 dst-table="public.sport_t" reference-fk="coach_fk1"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_coach_t_country_t" type="relfk"
+	 custom-color="#249b49"
+	 src-table="public.coach_t"
+	 dst-table="public.country_t" reference-fk="coach_fk2"
+	 src-required="false" dst-required="false"/>
+
+</dbmodel>

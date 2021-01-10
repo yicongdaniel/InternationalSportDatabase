@@ -1,0 +1,23 @@
+column_name,data_type,character_maximum_length,Description,Source
+building_id,character,1,The number ID of a building,Assigned by organizers
+building_name,character varying,20,The name of the building,Assigned by organizers
+address,character varying,30,The address of the stadium,Assigned by the government
+capacity,bigint,,The capacity of a stadium,Assigned by the stadium's head
+sport_id,character,6,Stadium's sport ID,Assigned by organizers
+athlete_id,smallint,,The unique number of an athlete,Assigned by organizers
+first_name,character varying,20,First name of an athlete,Enter by athelete
+last_name,character varying,20,Last name of an athlete,Enter by athelete
+gender,character,1,Gender of an athlete,Enter by athelete
+nationality,character,3,Nationality of an athlete,Enter by athelete
+sport_id,character,6,Athlete's sport ID,Enter by athelete
+age,smallint,,The age of an athlete,Enter by athelete
+sport_id,character,6,The number ID for a sport,Assigned by organizers
+sport_name,character varying,20,The name of the sport,Assigned by organizers
+building_id,character,1,The number ID for a building,Assigned by organizers
+country_code,character,3,The country code of a country,Assigned by organizers
+country_name,character varying,20,The name of a country,Assigned by organizers
+national_anthem,character varying,40,The national anthem of a country,Assigned by organizers
+coach_id,smallint,,The unique number of an coach,Assigned by organizers
+coach_name,character varying,20,The name of a coach,Enter by coach
+nationality,character,3,The nationality of a coach,Enter by coach
+sport_id,character,6,Coach's sport ID,Assigned by organizers
